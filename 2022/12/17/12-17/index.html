@@ -1,0 +1,218 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>内存映射 | Valerian's Blog</title><meta name="keywords" content="Linux"><meta name="author" content="Valerian"><meta name="copyright" content="Valerian"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="内存映射 内存映射（Memory-mapped I&#x2F;O) 是将磁盘文件的数据映射到内存，用户通过修改内存就能修改磁盘文件。这就是内存映射的目的  https:&#x2F;&#x2F;github.com&#x2F;Valerianding&#x2F;BlogPicture&#x2F;blob&#x2F;master&#x2F;Screen%20Shot%202022-12-17%20at%2010.17.11%20AM.png 系统调用说明： &#x2F;*   #inclu">
+<meta property="og:type" content="article">
+<meta property="og:title" content="内存映射">
+<meta property="og:url" content="http://example.com/2022/12/17/12-17/index.html">
+<meta property="og:site_name" content="Valerian&#39;s Blog">
+<meta property="og:description" content="内存映射 内存映射（Memory-mapped I&#x2F;O) 是将磁盘文件的数据映射到内存，用户通过修改内存就能修改磁盘文件。这就是内存映射的目的  https:&#x2F;&#x2F;github.com&#x2F;Valerianding&#x2F;BlogPicture&#x2F;blob&#x2F;master&#x2F;Screen%20Shot%202022-12-17%20at%2010.17.11%20AM.png 系统调用说明： &#x2F;*   #inclu">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/img/cover3.jpg">
+<meta property="article:published_time" content="2022-12-17T12:31:27.000Z">
+<meta property="article:modified_time" content="2022-12-17T12:41:06.519Z">
+<meta property="article:author" content="Valerian">
+<meta property="article:tag" content="Linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/cover3.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://example.com/2022/12/17/12-17/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"languages":{"hits_empty":"We didn't find any results for the search: ${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: 'Copy successfully',
+    error: 'Copy error',
+    noSupport: 'The browser does not support'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: 'days',
+  date_suffix: {
+    just: 'Just',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"Traditional Chinese Activated Manually","cht_to_chs":"Simplified Chinese Activated Manually","day_to_night":"Dark Mode Activated Manually","night_to_day":"Light Mode Activated Manually","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"bottom-left"},
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '内存映射',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-12-17 20:41:06'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/mycss.css"><link rel="stylesheet" href="/css/background.css"><link rel="stylesheet" href="/css/footer.css"><link rel="stylesheet" href="/css/nav.css"><link rel="stylesheet" href="/css/tagnum.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/js-heo@1.0.11/mainColor/heoMainColor.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/js-heo@1.0.11/poem/poem.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/js-heo@1.0.11/categoryBar/categoryBar.css"><link rel="stylesheet" type="text/css" href="https://blog.eurkon.com/css/custom.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/js-heo@1.0.11/mainColor/heoMainColor.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/js-heo@1.0.11/404/404.css"><meta name="generator" content="Hexo 5.4.2"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">Loading...</div></div></div><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/favicon.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">5</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">2</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">3</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/cover3.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Valerian's Blog</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> Search</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> About</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">内存映射</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2022-12-17T12:31:27.000Z" title="Created 2022-12-17 20:31:27">2022-12-17</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2022-12-17T12:41:06.519Z" title="Updated 2022-12-17 20:41:06">2022-12-17</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Linux/">Linux</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">Word count:</span><span class="word-count">1.8k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">Reading time:</span><span>7min</span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h3 id="内存映射"><a href="#内存映射" class="headerlink" title="内存映射"></a>内存映射</h3><ul>
+<li>内存映射（Memory-mapped I/O) 是将磁盘文件的数据映射到内存，用户通过修改内存就能修改磁盘文件。这就是内存映射的目的</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://github.com/Valerianding/BlogPicture/blob/master/Screen%20Shot%202022-12-17%20at%2010.17.11%20AM.png">https://github.com/Valerianding/BlogPicture/blob/master/Screen%20Shot%202022-12-17%20at%2010.17.11%20AM.png</a></p>
+<p>系统调用说明：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">   #include &lt;sys/mman.h&gt;</span></span><br><span class="line"><span class="comment">   void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);</span></span><br><span class="line"><span class="comment">    - 作用：将一个文件或者设备的数据映射到调用进程的虚拟地址中</span></span><br><span class="line"><span class="comment">    - 参数：</span></span><br><span class="line"><span class="comment">        - void *addr: 由内核指定 NULL</span></span><br><span class="line"><span class="comment">        - length：要映射的数据的长度 这个值不能为0 建议使用文件长度</span></span><br><span class="line"><span class="comment">               获取文件的长度： stat lseek  注意实际的length是Linux内存分页的整数倍</span></span><br><span class="line"><span class="comment">        - prot：对申请的内存映射区的操作权限</span></span><br><span class="line"><span class="comment">            -PROT_EXEC  Pages may be executed.</span></span><br><span class="line"><span class="comment">            -PROT_READ  Pages may be read.</span></span><br><span class="line"><span class="comment">            -PROT_WRITE Pages may be written.</span></span><br><span class="line"><span class="comment">            -PROT_NONE  Pages may not be accessed.</span></span><br><span class="line"><span class="comment">            要操作映射内存，必须要有读的权限。</span></span><br><span class="line"><span class="comment">        - flags：  </span></span><br><span class="line"><span class="comment">            - MAP_SHARED: 映射区的数据会自动和磁盘文件进行同步，进程间通信必须</span></span><br><span class="line"><span class="comment">            - MAP_PRIVATE: 不同步，内存映射区的数据改变了，对原来的文件不会修改，会重新创建一个新的文件 （Copy on write) </span></span><br><span class="line"><span class="comment">        - fd: 需要映射的文件的文件描述符</span></span><br><span class="line"><span class="comment">            - 通过open得到</span></span><br><span class="line"><span class="comment">            - 注意： 文件的大小不能为0 open指定的权限不能和prot有冲突</span></span><br><span class="line"><span class="comment">        - offset：偏移量，一般不用，必须指定的是4k的整数倍</span></span><br><span class="line"><span class="comment">    -返回值：错误返回（Void*）-1 正确的话返回创建的内存的首地址。</span></span><br><span class="line"><span class="comment">        </span></span><br><span class="line"><span class="comment">   int munmap(void *addr, size_t length);</span></span><br><span class="line"><span class="comment">    - 功能：释放内存映射</span></span><br><span class="line"><span class="comment">    - 参数：</span></span><br><span class="line"><span class="comment">        - addr: 要释放的内存的地址</span></span><br><span class="line"><span class="comment">        - length: 要释放的内存的大小，要和mmap函数中的</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">    使用内存映射实现进程间通信</span></span><br><span class="line"><span class="comment">    1. 有关系的进程（父子进程）</span></span><br><span class="line"><span class="comment">        - 还没有子进程的时候 先创建内存映射区</span></span><br><span class="line"><span class="comment">        - 创建子进程</span></span><br><span class="line"><span class="comment">        - 父子进程共享</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">    2. 没有关系的</span></span><br><span class="line"><span class="comment">        - 准备一个大小不是0的磁盘文件</span></span><br><span class="line"><span class="comment">        - 进程1 通过磁盘文件创建内存映射区 得到操作这块内存的指针</span></span><br><span class="line"><span class="comment">        - 进程2 通过磁盘文件创建内存映射区 得到操作这块内存的指针</span></span><br><span class="line"><span class="comment">    注意：内存映射区通信，是非阻塞的</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<p>下面是内存映射的一个简单实现，如果需要在同一个程序中的父子进程中进行通信，</p>
+<p>整体思路就是打开一个文件，并在创建进程前将其映射，然后在一个进程中拿到映射的地址指针去写， 一个进程从当前指针区读。注意因为都用的是字符串操作，</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/mman.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;wait.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="comment">// 1. 打开一个文件</span></span><br><span class="line"></span><br><span class="line">    <span class="type">int</span> fd = open(<span class="string">&quot;./test.txt&quot;</span>,O_RDWR);</span><br><span class="line">    <span class="keyword">if</span>(fd == <span class="number">-1</span>)&#123;</span><br><span class="line">        perror(<span class="string">&quot;open&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">  	<span class="comment">//通过lseek函数来获取文件的大小</span></span><br><span class="line">    <span class="type">int</span> size = lseek(fd,<span class="number">0</span>,SEEK_END);</span><br><span class="line"></span><br><span class="line">    <span class="type">void</span> *ptr = mmap(<span class="literal">NULL</span>,size,PROT_READ | PROT_WRITE, MAP_SHARED, fd, <span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span>(ptr == MAP_FAILED)&#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 怪 这里为什么会读取不到数据呢？</span></span><br><span class="line">    <span class="type">char</span> readbuf[<span class="number">64</span>];</span><br><span class="line">    <span class="built_in">memset</span>(readbuf,<span class="number">0</span>,<span class="keyword">sizeof</span>(readbuf));</span><br><span class="line">    <span class="type">int</span> length = read(fd,readbuf,<span class="number">64</span>);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;my read : %s length : %d\n&quot;</span>,readbuf,length);</span><br><span class="line"></span><br><span class="line">    <span class="comment">//创建子进程</span></span><br><span class="line">    <span class="type">pid_t</span> pid = fork();</span><br><span class="line">    <span class="keyword">if</span>(pid &gt; <span class="number">0</span>)&#123;</span><br><span class="line">        wait(<span class="literal">NULL</span>);</span><br><span class="line">        <span class="type">char</span> buf[<span class="number">64</span>];</span><br><span class="line">        <span class="built_in">strcpy</span>(buf, (<span class="type">char</span> *)ptr);</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;read data : %s\n&quot;</span>, buf);</span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span>(pid == <span class="number">0</span>)&#123;</span><br><span class="line">         <span class="built_in">strcpy</span>((<span class="type">char</span>*)ptr,<span class="string">&quot;nihao son!!!&quot;</span>);</span><br><span class="line">         <span class="comment">//会自动同步到test.txt1</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//关闭内存映射区</span></span><br><span class="line">    munmap(ptr,size);</span><br><span class="line">    close(fd);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="思考问题"><a href="#思考问题" class="headerlink" title="思考问题"></a>思考问题</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">1.如果对mmap的返回值(ptr)做++操作(ptr++),munmap是否能够成功？</span><br><span class="line">可以对其进行++操作</span><br><span class="line">但是如果直接munmap就会报错 需要保存地址以保证成功释放</span><br><span class="line"></span><br><span class="line">2.如果open是O_RDONLY，mmap时prot参数指定PROT_READ|PROT_WRITE会怎样？</span><br><span class="line">错误，返回MAP_FAILED 明显你最开始给多大权限后面映射操作你就能有多大权限</span><br><span class="line">open()函数中的权限建议和prot参数的权限保持一致。</span><br><span class="line"></span><br><span class="line">3.如果文件偏移量为1000会怎样</span><br><span class="line">必须是页的整数倍4K的整数倍，不到4k整数倍会返回MAP_FAILED</span><br><span class="line"></span><br><span class="line">4.mmap调用失败</span><br><span class="line">第二个参数：length = 0  映射的大小</span><br><span class="line">第三个参数：只是指定了写权限 调用失败  跟open函数指定的不同</span><br><span class="line"></span><br><span class="line">5.可以open的时候O_CREATE一个新文件来创建映射区吗</span><br><span class="line">可以，但是创建的文件大小不能为0 //很好理解如果是0 length不就是0了</span><br><span class="line">要对新的文件扩展 lseek truncate</span><br><span class="line"></span><br><span class="line">6.mmap后关闭文件描述符，对mmap映射有没有影响</span><br><span class="line">	int fd = open(&quot;XXX&quot;)</span><br><span class="line">	mmap( ,fd, )</span><br><span class="line">	close(fd)</span><br><span class="line">	映射区还在，只是创建的fd被关闭了，没有任何影响</span><br><span class="line">	</span><br><span class="line">7.对ptr越界操作会怎样？</span><br><span class="line">void *ptr = mmap(NULL,100,...);</span><br><span class="line">4k </span><br><span class="line">越界操作 操作的是 非法的内存 会导致段错误</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="使用内存映射实现文件拷贝的功能"><a href="#使用内存映射实现文件拷贝的功能" class="headerlink" title="使用内存映射实现文件拷贝的功能"></a>使用内存映射实现文件拷贝的功能</h4><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">思路</span><br><span class="line">1.对原始的文件进行内存映射</span><br><span class="line">2.创建一个新文件 并对文件进行拓展</span><br><span class="line">3.把新文件的数据映射到内存中</span><br><span class="line">4.通过内存拷贝将第一个文件的内存数据拷贝到新的文件内存中</span><br><span class="line">5.释放资源</span><br></pre></td></tr></table></figure>
+
+<p>实现如下，其实还是就是一堆函数调用，重点是理解原理，其实就是在一个程序中，映射了两个文件，然后就可以通过内存的形式对文件进行操作。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/mman.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;wait.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="comment">// 1.对原始的文件进行内存映射</span></span><br><span class="line">    <span class="type">int</span> fd = open(<span class="string">&quot;english.txt&quot;</span>, O_RDWR);<span class="comment">//虽然此时读权限已经够了</span></span><br><span class="line">    <span class="keyword">if</span>(fd == <span class="number">-1</span>) &#123;</span><br><span class="line">        perror(<span class="string">&quot;open&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 获取原始文件的大小</span></span><br><span class="line">    <span class="type">int</span> len = lseek(fd, <span class="number">0</span>, SEEK_END);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2.创建一个新文件（拓展该文件）</span></span><br><span class="line">    <span class="type">int</span> fd1 = open(<span class="string">&quot;cpy.txt&quot;</span>, O_RDWR | O_CREAT, <span class="number">0664</span>);</span><br><span class="line">    <span class="keyword">if</span>(fd1 == <span class="number">-1</span>) &#123;</span><br><span class="line">        perror(<span class="string">&quot;open&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 对新创建的文件进行拓展</span></span><br><span class="line">    truncate(<span class="string">&quot;cpy.txt&quot;</span>, len);<span class="comment">//len要和原始文件大小一样</span></span><br><span class="line">    write(fd1, <span class="string">&quot; &quot;</span>, <span class="number">1</span>);<span class="comment">// ---&gt;为啥这里一定要对它先做一个写操作???????????????????????????  因为只有写了才能进行扩展</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 3.分别做内存映射</span></span><br><span class="line">    <span class="type">void</span> * ptr = mmap(<span class="literal">NULL</span>, len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, <span class="number">0</span>);</span><br><span class="line">    <span class="type">void</span> * ptr1 = mmap(<span class="literal">NULL</span>, len, PROT_READ | PROT_WRITE, MAP_SHARED, fd1, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(ptr == MAP_FAILED) &#123;</span><br><span class="line">        perror(<span class="string">&quot;mmap&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(ptr1 == MAP_FAILED) &#123;</span><br><span class="line">        perror(<span class="string">&quot;mmap&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 内存拷贝</span></span><br><span class="line">    <span class="built_in">memcpy</span>(ptr1, ptr, len);</span><br><span class="line">    <span class="comment">// 释放资源  先打开的后释放，后打开的先释放</span></span><br><span class="line">    munmap(ptr1, len);</span><br><span class="line">    munmap(ptr, len);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>不能映射太大的文件</li>
+</ul>
+<h4 id="匿名映射"><a href="#匿名映射" class="headerlink" title="匿名映射"></a>匿名映射</h4><p>不需要文件实体进程一个内存映射 只能父子间的</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/mman.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;wait.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span>&#123;</span><br><span class="line">    <span class="type">int</span> length = <span class="number">4096</span>;</span><br><span class="line">    <span class="type">void</span> *ptr = mmap(<span class="literal">NULL</span>,length,PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS,<span class="number">-1</span>,<span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span>(ptr == MAP_FAILED)&#123;</span><br><span class="line">        perror(<span class="string">&quot;mmap&quot;</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//父子进程间通信</span></span><br><span class="line">    <span class="type">int</span> pid = fork();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(pid &gt; <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="comment">//父进程</span></span><br><span class="line">        <span class="built_in">strcpy</span>((<span class="type">char</span>*)ptr,<span class="string">&quot;hello world1&quot;</span>);</span><br><span class="line">        wait(<span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">    &#125;<span class="keyword">else</span> <span class="keyword">if</span>(pid == <span class="number">0</span>)&#123;</span><br><span class="line">        <span class="comment">//子进程</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//内存映射是非阻塞的</span></span><br><span class="line">        sleep(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>,(<span class="type">char</span>*)ptr);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//释放内存</span></span><br><span class="line">    munmap(ptr,length);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</article><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Linux/">Linux</a></div><div class="post_share"><div class="social-share" data-image="/img/cover3.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-full"><a href="/2022/12/15/C/"><img class="prev-cover" src="/img/cover1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">Previous Post</div><div class="prev_info">C++</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/favicon.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Valerian</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">5</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">2</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">3</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><!--!=partial('includes/widget/card_announcement', {}, {cache: true})--><div class="card-widget" id="card-poem"><div id="poem_sentence"></div><div id="poem_info"><div id="poem_dynasty"></div><div id="poem_author"></div></div></div><script src="https://cdn.jsdelivr.net/npm/js-heo@1.0.11/poem/jinrishici.js" charset="utf-8"></script><script type="text/javascript">jinrishici.load(function(result) {
+var sentence = document.querySelector("#poem_sentence")
+var author = document.querySelector("#poem_author")
+var dynasty = document.querySelector("#poem_dynasty")
+
+var sentenceText = result.data.content
+sentenceText = sentenceText.substr(0, sentenceText.length - 1);
+sentence.innerHTML = sentenceText
+dynasty.innerHTML = result.data.origin.dynasty
+author.innerHTML = result.data.origin.author + '《' + result.data.origin.title + '》'
+});</script><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Catalog</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84"><span class="toc-number">1.</span> <span class="toc-text">内存映射</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%80%9D%E8%80%83%E9%97%AE%E9%A2%98"><span class="toc-number">1.1.</span> <span class="toc-text">思考问题</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84%E5%AE%9E%E7%8E%B0%E6%96%87%E4%BB%B6%E6%8B%B7%E8%B4%9D%E7%9A%84%E5%8A%9F%E8%83%BD"><span class="toc-number">1.2.</span> <span class="toc-text">使用内存映射实现文件拷贝的功能</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8C%BF%E5%90%8D%E6%98%A0%E5%B0%84"><span class="toc-number">1.3.</span> <span class="toc-text">匿名映射</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/12/17/12-17/" title="内存映射"><img src="/img/cover3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="内存映射"/></a><div class="content"><a class="title" href="/2022/12/17/12-17/" title="内存映射">内存映射</a><time datetime="2022-12-17T12:31:27.000Z" title="Created 2022-12-17 20:31:27">2022-12-17</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/12/15/C/" title="C++"><img src="/img/cover1.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="C++"/></a><div class="content"><a class="title" href="/2022/12/15/C/" title="C++">C++</a><time datetime="2022-12-15T13:09:45.000Z" title="Created 2022-12-15 21:09:45">2022-12-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/12/15/Linux/" title="Linux"><img src="/img/cover3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Linux"/></a><div class="content"><a class="title" href="/2022/12/15/Linux/" title="Linux">Linux</a><time datetime="2022-12-15T13:03:49.000Z" title="Created 2022-12-15 21:03:49">2022-12-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/10/18/%E4%B8%BB%E9%A2%98%E7%89%B9%E6%AE%8A%E5%8A%9F%E8%83%BD/" title="主题特殊功能"><img src="/img/cover3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="主题特殊功能"/></a><div class="content"><a class="title" href="/2022/10/18/%E4%B8%BB%E9%A2%98%E7%89%B9%E6%AE%8A%E5%8A%9F%E8%83%BD/" title="主题特殊功能">主题特殊功能</a><time datetime="2022-10-18T01:50:38.157Z" title="Created 2022-10-18 09:50:38">2022-10-18</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/10/15/hello-world/" title="Hello World"><img src="/img/cover3.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hello World"/></a><div class="content"><a class="title" href="/2022/10/15/hello-world/" title="Hello World">Hello World</a><time datetime="2022-10-15T11:04:31.362Z" title="Created 2022-10-15 19:04:31">2022-10-15</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2022 By Valerian</div><div class="footer_custom_text">Hi Anonymous,Welcome to my <a target="_blank" rel="noopener" href="https://valerianding.github.io">blog</a>!</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Switch Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between single-column and double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="Back To Top"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">Search</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  Loading the Database</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="Search for Posts" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script src="/js/search/local-search.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"><script>(() => {
+  const $mermaidWrap = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaidWrap.length) {
+    window.runMermaid = () => {
+      window.loadMermaid = true
+      const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+      Array.from($mermaidWrap).forEach((item, index) => {
+        const mermaidSrc = item.firstElementChild
+        const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+        const mermaidID = 'mermaid-' + index
+        const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+        mermaid.mermaidAPI.render(mermaidID, mermaidDefinition, (svgCode) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svgCode)
+        })
+      })
+    }
+
+    const loadMermaid = () => {
+      window.loadMermaid ? runMermaid() : getScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(runMermaid)
+    }
+
+    window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+  }
+})()</script></div><script src="/js/footer.js"></script><script async src="https://cdn.jsdelivr.net/npm/js-heo@1.0.11/categoryBar/categoryBar.js"></script></div></body></html>
